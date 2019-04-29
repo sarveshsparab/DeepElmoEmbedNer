@@ -24,13 +24,13 @@ from utils.checkmate import BestCheckpointSaver, best_checkpoint
 
 from model.bilm.data import Batcher
 from model.bilm.model import BidirectionalLanguageModel
-from model.ner import NER
+from model.ner import Ner
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 
-class DeepElmoEmbedNer(NER):
+class DeepElmoEmbedNer(Ner):
     """
     Setting up the logger for both the application logs and the tensorflow logs
     Application Log path : ../logs/app-{%H_%M_%S}.log
