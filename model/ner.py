@@ -116,7 +116,7 @@ class NER(abc.ABC):
             groundTruths: [tuple,...], list of tuples representing ground truth.
 
         Returns:
-            metrics: tuple with (p,r,f1). Each element is float.
+                metrics: tuple with (p,r,f1). Each element is float.
 
         Raises:
             None

@@ -1,3 +1,11 @@
+"""
+@author: Sarvesh Parab
+@course: USC CSCI 571
+Term : Spring 2019
+Email : sparab@usc.edu
+Website : http://www.sarveshparab.com
+"""
+
 import os
 from datetime import datetime
 import numpy as np
@@ -20,7 +28,11 @@ from model.ner import NER
 
 
 class DeepElmoEmbedNer(NER):
-
+    """
+    Setting up the logger for both the application logs and the tensorflow logs
+    Application Log path : ../logs/app-{%H_%M_%S}.log
+    Tensorflow Log path : ../logs/tf-{%H_%M_%S}.log
+    """
     # Setting up the logger
     log = logging.getLogger('root')
     logdatetime = datetime.now().strftime("%H_%M_%S")
@@ -44,9 +56,39 @@ class DeepElmoEmbedNer(NER):
     ]
     logging.getLogger('tensorflow').handlers = handlers
 
+    """
+    Default blank constructor
+    """
     def __init__(self):
         pass
 
+    """
+    Providing definition to the abstract DITK parent class method - convert_ground_truth
+
+    # Description: 
+        Converts test data into common format for evaluation [i.e. same format as predict()]
+        This added step/layer of abstraction is required due to the refactoring of read_dataset_train()
+        and read_dataset_test() back to the single method of read_dataset() along with the requirement on
+        the format of the output of predict() and therefore the input format requirement of evaluate(). Since
+        individuals will implement their own format of data from read_dataset(), this is the layer that
+        will convert to proper format for evaluate().
+    # Arguments:
+        data        - data in proper format for train or test. [i.e. format of output from read_dataset]
+        *args       - Not Applicable
+        **kwargs    - wordPosition [default : 0] - Column number with the mention word
+                    - tagPosition [default : 3] - Column number with the entity tag
+                    - writeGroundTruthToFile [default : True] - Flag to enable writing ground truths to a file
+                    - groundTruthPath [default : ../results/groundTruths.txt] - Location to save the ground truths file
+    # Return:
+        [tuple,...], i.e. list of tuples. [SAME format as output of predict()]
+            Each tuple is (start index, span, mention text, mention type)
+            Where:
+             - start index: int, the index of the first character of the mention span. None if not applicable.
+             - span: int, the length of the mention. None if not applicable.
+             - mention text: str, the actual text that was identified as a named entity. Required.
+             - mention type: str, the entity/mention type. None if not applicable.
+
+    """
     def convert_ground_truth(self, data, *args, **kwargs):
         self.log.debug("Invoked convert_ground_truth method")
         self.log.debug("With parameters : ")
@@ -85,6 +127,25 @@ class DeepElmoEmbedNer(NER):
 
         return tag_contents
 
+    """
+    Providing definition to the abstract DITK parent class method - read_dataset
+
+    # Description: 
+        Reads a dataset in preparation for train or test. Returns data in proper format for train or test.
+    # Arguments:
+        file_dict   - A dictionary with these keys:
+                        - train - Location of train dataset file
+                        - test - Location of test dataset file
+                        - dev - Location of dev dataset file
+        dataset_name- Name of the dataset required for calling appropriate utils, converters
+        *args       - Not Applicable
+        **kwargs    - fileHasHeaders [default : True] - Flag to check if input file has headers
+                    - columnDelimiter [default : `space`] - Delimiter in the data input
+    # Return:
+        A dictionary of file_dict keys as keys and values as lists of lines, where in each line is further tokenized
+        on the column delimiter and extracted as a list 
+
+    """
     def read_dataset(self, file_dict, dataset_name, *args, **kwargs):
         self.log.debug("Invoked read_dataset method")
         self.log.debug("With parameters : ")
@@ -105,7 +166,7 @@ class DeepElmoEmbedNer(NER):
                     raw_data = f.read().splitlines()
                 for i, line in enumerate(raw_data):
                     if len(line.strip()) > 0:
-                        raw_data[i] = line.strip().split()
+                        raw_data[i] = line.strip().split(kwargs.get("columnDelimiter", " "))
                     else:
                         raw_data[i] = list(line)
                 data[split] = raw_data
@@ -114,7 +175,43 @@ class DeepElmoEmbedNer(NER):
         except Exception as e:
             print('Something went wrong.', e)
         return data
-
+    """
+    Providing definition to the abstract DITK parent class method - train
+    
+    # Description: 
+        Trains he model on the parsed data
+        Calls the internal save_model method to save the trained model for predictions
+    # Arguments:
+        data        - Parsed input data in the format returned by read_dataset method
+        *args       - Not Applicable
+        **kwargs    - parsedDumpPath [default : ../dev/parsedDataDump.pkl] - Location of the parsed input data-files in the pickled format
+                    - vocabPath [default : ../dev/vocab.txt] - Location of the parsed vocab
+                    - elmoOptionsFile [default : ../resources/elmo/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json] - ELMo model options parameters file
+                    - elmoWeightFile [default : ../resources/elmo/elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5] - ELMo model weights file 
+                    - wordEmbeddingSize [default : 50] - Set the ELMo word embedding size for the model
+                    - charEmbeddingSize [default : 16] - Set the ELMo character embedding size for the model
+                    - LSTMStateSize [default : 200] - State size of the Multi-LSTM layers
+                    - filterNum [default : 128] - Filter area size
+                    - filterSize [default : 3] - Number of filters in the model
+                    - learningRate [default : 0.015] - Model learning rate
+                    - dropoutRate [default : 0.5] - Model dropout rate
+                    - epochWidth [default : 16] - Batch size within each epoch
+                    - maxEpoch [default : 100] - Number of epoch to run for training
+                    - checkpointPath [default : ../results/checkpoints] - Location to save intermediate checkpoints
+                    - bestCheckpointPath [default : ../results/checkpoints/best] - Location to save the best F1 returning 
+                    - trainWordsPath [default : ../dev/train.word.vocab] - Location to save the intermediate vocabulary words from the training set
+                    - trainCharPath [default : ../dev/train.char.vocab] - Location to save the intermediate vocabulary characters from the training set
+                    - gloveEmbedPath [default : ../resources/glove/glove.6B.50d.txt] - Location fo the glove embedding file
+                    - fetchPredictData [default : False] - Flag to toggle behaviour of the internal data_converter method
+                    - maxWordLength [default : 30] - Set maximal word length for the model
+                    - wordPosition [default : 0] - Column number with the mention word
+                    - tagPosition [default : 3] - Column number with the entity tag
+    # Return:
+        model   - Trained ELMo model object
+        sess    - Tensorflow session object (will be used to maintain the tensorflow session instance)
+        saver   - Tensorflow saver instance (will be used to load model again)
+    
+    """
     def train(self, data, *args, **kwargs):
 
         if not os.path.isfile(kwargs.get("parsedDumpPath", '../dev/parsedDataDump.pkl')):
@@ -235,6 +332,38 @@ class DeepElmoEmbedNer(NER):
         self.log.debug("Training done! ... Saving trained model")
         return model, sess, saver
 
+    """
+    Providing definition to the abstract DITK parent class method - predict
+    
+    # Description:
+        Predicts on the given input data. Assumes model has been trained with train()
+        Calls the internal load_model method to load the trained model for predictions
+    # Arguments:
+        data        - The file location with the input text in the common format for prediction
+        *args       - Not Applicable
+        **kwargs    - model [default : N/A] - ElmoModel instance to hold the loaded model into
+                    - sess [default : N/A] - Tensorflow.Session instance used to maintain the same session used to train
+                    - saver [default : N/A] - Tensorflow.train.saver instance used to load the trained model
+                    - trainedData [default : N/A] - Parsed trained data
+                    - fileHasHeaders  [default : True] - Flag to check if input file has headers
+                    - parsedDumpPath [default : ../dev/parsedDataDump.pkl] - Location of the parsed input data-files in the pickled format
+                    - bestCheckpointPath [default : ../results/checkpoints/best] - Location to save the best F1 returning
+                    - epochWidth [default : 16] - Batch size within each epoch
+                    - writePredsToFile [default : True] - Flag to enable writing predictions to file
+                    - predsPath [default : ../results/predictions.txt] - Location where to write predictions into
+                    - writeInputToFile [Default : False] - Flag to toggle behaviour of the internal data_converter method
+    # Return:
+        [tuple,...], i.e. list of tuples.
+            Each tuple is (start index, span, mention text, mention type)
+            Where:
+             - start index: int, the index of the first character of the mention span. None if not applicable.
+             - span: int, the length of the mention. None if not applicable.
+             - mention text: str, the actual text that was identified as a named entity. Required.
+             - mention type: str, the entity/mention type. None if not applicable.
+
+             NOTE: len(predictions) should equal len(data) AND the ordering should not change [important for
+                 evaluation. See note in evaluate() about parallel arrays.]
+    """
     def predict(self, data, *args, **kwargs):
         self.log.debug("Invoked predict method")
         self.log.debug("With parameters : ")
@@ -293,6 +422,23 @@ class DeepElmoEmbedNer(NER):
 
         return ret_pred_tuple
 
+    """
+    Providing definition to the abstract DITK parent class method - evaluate
+    
+    # Description:
+        Calculates evaluation metrics on chosen benchmark dataset
+            - Precision
+            - Recall
+            - F1 Score
+    # Arguments:
+        predictions - List of predicted labels
+        groundTruths- List of ground truth labels
+        *args       - Not Applicable
+        **kwargs    - predsPath [default : ../results/predictions.txt] - Location where to write predictions into
+                    - groundTruthPath [default : ../results/groundTruths.txt] - Location to save the ground truths file
+    # Return:
+        Tuple with metrics (p,r,f1). Each element is float.
+    """
     def evaluate(self, predictions, groundTruths, *args, **kwargs):
         self.log.debug("Invoked evaluate method")
         self.log.debug("With parameters : ")
