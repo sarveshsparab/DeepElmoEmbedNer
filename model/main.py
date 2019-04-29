@@ -26,6 +26,9 @@ from model.bilm.data import Batcher
 from model.bilm.model import BidirectionalLanguageModel
 from model.ner import NER
 
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
 
 class DeepElmoEmbedNer(NER):
     """
@@ -452,11 +455,14 @@ class DeepElmoEmbedNer(NER):
 
         if predictions is None and groundTruths is None:
             with open(kwargs.get("predsPath", '../results/predictions.txt'), mode='r', encoding='utf-8') as f:
+                next(f)
+                next(f)
                 raw_preds = f.read().splitlines()
 
             for x in range(len(raw_preds)):
-                true_vals.append(raw_preds[x].split(" ")[1])
-                pred_vals.append(raw_preds[x].split(" ")[2])
+                if raw_preds[x] != "" or len(raw_preds[x]) != 0:
+                    true_vals.append(raw_preds[x].split(" ")[1])
+                    pred_vals.append(raw_preds[x].split(" ")[2])
 
         else:
             true_vals = groundTruths

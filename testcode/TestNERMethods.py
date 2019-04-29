@@ -1,6 +1,6 @@
 import unittest
 import pandas as pd
-from model.DeepElmoEmbedNer import DeepElmoEmbedNer
+from model.main import DeepElmoEmbedNer
 
 
 class TestNERMethods(unittest.TestCase):

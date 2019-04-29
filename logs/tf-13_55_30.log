@@ -1,0 +1,33 @@
+From c:\users\sarve\appdata\local\programs\python\python37\lib\site-packages\tensorflow\python\framework\op_def_library.py:263: colocate_with (from tensorflow.python.framework.ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Colocations handled automatically by placer.
+From c:\users\sarve\appdata\local\programs\python\python37\lib\site-packages\tensorflow\python\ops\lookup_ops.py:1137: to_int64 (from tensorflow.python.ops.math_ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use tf.cast instead.
+From ..\model\Elmo.py:138: calling dropout (from tensorflow.python.ops.nn_ops) with keep_prob is deprecated and will be removed in a future version.
+Instructions for updating:
+Please use `rate` instead of `keep_prob`. Rate should be set to `rate = 1 - keep_prob`.
+From ..\model\bilm\model.py:412: calling squeeze (from tensorflow.python.ops.array_ops) with squeeze_dims is deprecated and will be removed in a future version.
+Instructions for updating:
+Use the `axis` argument instead
+From ..\model\bilm\model.py:552: LSTMCell.__init__ (from tensorflow.python.ops.rnn_cell_impl) is deprecated and will be removed in a future version.
+Instructions for updating:
+This class is equivalent as tf.keras.layers.LSTMCell, and will be replaced by that in Tensorflow 2.0.
+From ..\model\bilm\model.py:597: dynamic_rnn (from tensorflow.python.ops.rnn) is deprecated and will be removed in a future version.
+Instructions for updating:
+Please use `keras.layers.RNN(cell)`, which is equivalent to this API
+From c:\users\sarve\appdata\local\programs\python\python37\lib\site-packages\tensorflow\python\ops\rnn.py:626: to_int32 (from tensorflow.python.ops.math_ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use tf.cast instead.
+From ..\model\Elmo.py:181: GRUCell.__init__ (from tensorflow.python.ops.rnn_cell_impl) is deprecated and will be removed in a future version.
+Instructions for updating:
+This class is equivalent as tf.keras.layers.GRUCell, and will be replaced by that in Tensorflow 2.0.
+From c:\users\sarve\appdata\local\programs\python\python37\lib\site-packages\tensorflow\contrib\rnn\python\ops\rnn.py:233: bidirectional_dynamic_rnn (from tensorflow.python.ops.rnn) is deprecated and will be removed in a future version.
+Instructions for updating:
+Please use `keras.layers.Bidirectional(keras.layers.RNN(cell))`, which is equivalent to this API
+From c:\users\sarve\appdata\local\programs\python\python37\lib\site-packages\tensorflow\python\training\saver.py:1266: checkpoint_exists (from tensorflow.python.training.checkpoint_management) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use standard file APIs to check for files with this prefix.
+Restoring parameters from ../results/checkpoints\model.ckpt-1
+../results/checkpoints/best\best.ckpt-4 is not in all_model_checkpoint_paths. Manually adding it.
+Restoring parameters from ../results/checkpoints/best\best.ckpt-4
